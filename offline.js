@@ -14,8 +14,14 @@ const Offline = (() => {
   const keyFor = value => String(value).toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^[-_]+|[-_]+$/g, '').slice(0, 70) || 'level';
   const exportPaths = new Map(Object.entries(window.TIDY_GDD_TIDY_ART ?? {}));
   const namedItems = new Map(), namedRooms = new Map();
+  const bundledItems = new Map();
   for (const [rows,aliases,folder] of [[items,namedItems,'Items'],[rooms,namedRooms,'Rooms']]) {
     for (const row of rows.values()) {
+      if (row.bundlePath) {
+        exportPaths.set(row.path,row.bundlePath);
+        bundledItems.set(JSON.stringify([row.bundlePath,row.id]),row);
+        continue;
+      }
       if (row.displayName) {
         exportPaths.set(row.path,prefix+folder+'/'+row.url.split('/').at(-1));
         aliases.set(row.url,row);
@@ -270,7 +276,8 @@ const Offline = (() => {
     const missing = new Set();
     const objects = raw.content.map((it, layer) => {
       const id = it.id;
-      let art = items.get(it.art) ?? namedItems.get(it.art);
+      let art = items.get(it.art) ?? namedItems.get(it.art)
+        ?? bundledItems.get(JSON.stringify([it.art,it.sourceId ?? it.id]));
       if (!art && mode === 'room') art = roomAssets.get(id);
       if (!art && mode === 'tidy') art = items.get(`Art/TidyRoom/${id}.png`) ?? roomAssets.get(id);
       if (!art && mode === 'happy') art = items.get(`Art/Happy/${id}.png`);

@@ -4,6 +4,8 @@ Sau khi clone hoặc sao chép thư mục, mở **index.html** bằng Chrome ho�
 
 Chọn **Nhập level → Mở 137 màn GDD** để mở bộ RoomSort × Tidy Room 57 đã chốt. Dùng danh sách trên bàn chơi để chọn màn, sau đó mở **Playtest** hoặc tab **JSON**.
 
+Mở **Nhập level → RoomSort New · 160 màn** để xem tuyến level của bản RoomSort 1.0.24. Mục **Asset theo level** cũng có bộ này để chọn đồ theo màn. Ảnh của bản mới nằm trong `Art/RoomSortOffline/New`. Playtest dùng luật và vùng chạm của tool.
+
 Trong **Nhập level → Level tham chiếu**, chọn **Happy Tidy Room (Lumos)**, **Tidy Room Circle** hoặc **Amochioom (Room Sort)**. Tool hiển thị toàn nền. Camera trong game có cách zoom và căn khung riêng.
 
 Tab **JSON** ở cột bên phải mặc định hiện dữ liệu chỉnh level. `bg` và `content[].id` là mã tra catalog. `content` đi từ lớp dưới lên và `order` theo thứ tự mở hộp. `angle`, scale và `size` chỉ có khi khác mặc định. **Lưu JSON** và **Lưu cả bộ** dùng cùng định dạng này. **JSON xuất Unity** hiện riêng dữ liệu mà runtime Unity cần để tải ảnh và kiểm tra va chạm.

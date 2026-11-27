@@ -75,7 +75,7 @@ const url=process.env.TIDY_TEST_URL || pathToFileURL(path.join(__dirname,'index.
     assert.equal(await usedBook.count(),1);
     await page.locator('#search').clear();
     await page.locator('#levelAssetsTab').click();
-    for(const [pack,count] of [['gdd',137],['happy',65],['tidy',100],['roomsort',139]]){
+    for(const [pack,count] of [['gdd',137],['happy',65],['tidy',100],['roomsort',139],['roomsort-new',160]]){
       await page.locator('#assetLevelPack').selectOption(pack);
       await page.waitForFunction(count=>$('assetLevelNumber').options.length===count,count);
       const expected=await page.evaluate(()=>[...new Set(assetLevelPack.levels[0].items.map(it=>it.asset))].slice(0,48));

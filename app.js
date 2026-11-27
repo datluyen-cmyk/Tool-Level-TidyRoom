@@ -12,6 +12,7 @@ const assetURL=Offline.artURL;
 const say=s=>{$('notice').textContent=s};
 const boundaryMessage='Đặt toàn bộ món đồ trong khung ảnh nền.';
 let catalog,level=null,assetLookup=new Map(),groupNames=new Map(),batch=null,batchPos=-1,pending=null,game=null,playingLoad=false;
+let standardGroups=[];
 let selection=new Set(),clipboard=[],pasteOffset=0,marqueeMode=false,showPortrait=false;
 let history=[],future=[],kind='items',assetPage=0,showGrid=true,showBoxes=true,inspector='layer',space=false,drag=null,flash=null;
 let paletteGesture=null,ghost=null,idSerial=0;
@@ -265,7 +266,7 @@ function renderBatch(){
 }
 function label(group){return groupNames.get(group)??`Nhóm ${group}`}
 function knownGroups(){
-  const keys=new Set([...groupNames.keys(),...level.items.map(i=>i.group),...level.boxes.map(b=>b.group)]);
+  const keys=new Set([...standardGroups,...level.items.map(i=>i.group),...level.boxes.map(b=>b.group)]);
   return [...keys].sort((a,b)=>label(a).localeCompare(label(b),'vi')||a-b);
 }
 function groupSelect(select,preset,prefer,preserve=false){
@@ -1694,7 +1695,7 @@ function openReport(){
 }
 async function importPack(job,status=$('importStatus'),targets={}){
   if(busyImport||variantJob||variantPreview||game||playingLoad)return;busyImport=true;status.textContent='Đang chuyển level và kiểm tra asset…';
-  for(const k of ['allRoom','allHappy','allGdd','allTidy','chooseFiles'])$(k).disabled=true;
+  for(const k of ['allRoom','allHappy','allGdd','allTidy','allRoomNew','chooseFiles'])$(k).disabled=true;
   try{
     const p=await job();
     if(!p.levels.length){
@@ -1706,7 +1707,7 @@ async function importPack(job,status=$('importStatus'),targets={}){
     say(`Đã nhập ${p.levels.length} màn${p.rejected.length?` · ${p.rejected.length} lỗi` : ''}. Chọn màn ở hàng phía trên.`);
     if(p.rejected.length)openReport();
   }catch(e){status.textContent=e.message;}finally{
-    busyImport=false;for(const k of ['allGdd','allTidy','chooseFiles'])$(k).disabled=false;
+    busyImport=false;for(const k of ['allGdd','allTidy','allRoomNew','chooseFiles'])$(k).disabled=false;
     $('allRoom').disabled=!Offline.sources.roomsort.length;$('allHappy').disabled=!Offline.sources.happy.length;
   }
 }
@@ -1737,6 +1738,7 @@ async function readBundledPack(filename,variable,key){
 }
 const gddBundle=['gdd-137.js','TIDY_GDD_PACK_GZIP','roomsort-tidy57-gdd-137'];
 const tidyBundle=['tidy57-100.js','TIDY_TIDY57_PACK_GZIP','tidy57-original-100'];
+const roomNewBundle=['roomsort-new-160.js','TIDY_ROOMSORT_NEW_PACK_GZIP','roomsort-new-v24'];
 let gddPackRequest;
 function readGddPack(){
   return gddPackRequest??=readBundledPack(...gddBundle).catch(error=>{gddPackRequest=null;throw error;});
@@ -1748,6 +1750,7 @@ function readAssetLevelPack(key){
     const request=Promise.resolve().then(()=>{
       if(key==='gdd')return readGddPack();
       if(key==='tidy')return readBundledPack(...tidyBundle);
+      if(key==='roomsort-new')return readBundledPack(...roomNewBundle);
       return Offline.library(key);
     }).catch(error=>{assetLevelPacks.delete(key);throw error;});
     assetLevelPacks.set(key,request);
@@ -1979,6 +1982,7 @@ function bind(){
   $('allRoom').onclick=()=>source('roomsort');$('allHappy').onclick=()=>source('happy');
   $('allGdd').onclick=openGddPack;
   $('allTidy').onclick=()=>importPack(async()=>clone(await readAssetLevelPack('tidy')));
+  $('allRoomNew').onclick=()=>importPack(async()=>clone(await readAssetLevelPack('roomsort-new')));
   $('chooseFiles').onclick=()=>pickLevelFiles($('files'),$('source').value,$('importStatus'));
   for(const k of ['files','folder'])$(k).onchange=()=>{importFiles($(k).files);$(k).value='';};
   $('drop').ondragover=e=>{e.preventDefault();$('drop').classList.add('over')};$('drop').ondragleave=()=>$('drop').classList.remove('over');
@@ -2126,6 +2130,9 @@ async function initialize(){
   groupNames=new Map(catalog.items.filter(a=>a.group!==null).map(a=>[a.group,a.label]));
   for(const [id,name] of Object.entries(catalog.roomGroups))groupNames.set(+id,name);
   groupNames.set(0,'Chưa gán nhóm');
+  const roomNewGroups=new Set(catalog.items.filter(a=>a.family==='roomsort-new').map(a=>a.group));
+  const existingGroups=new Set(catalog.items.filter(a=>a.family!=='roomsort-new').map(a=>a.group));
+  standardGroups=[...groupNames.keys()].filter(id=>!roomNewGroups.has(id)||existingGroups.has(id));
   $('allRoom').disabled=!Offline.sources.roomsort.length;$('allHappy').disabled=!Offline.sources.happy.length;
   const storedTemplates=await readDraft('templates').catch(()=>null);
   if(storedTemplates)templates=storedTemplates;

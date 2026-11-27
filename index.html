@@ -8,7 +8,7 @@
   <div class="tabs asset-tabs"><button class="active" id="itemsTab" aria-pressed="true">Đồ vật</button><button id="bgTab" aria-pressed="false">Ảnh nền</button><button id="unusedTab" aria-pressed="false" title="Ảnh vật phẩm không xuất hiện trong bộ GDD 137 level">Chưa dùng</button><button id="levelAssetsTab" aria-pressed="false">Asset theo level</button></div>
   <div class="filters">
    <div id="assetLevelFilters" class="asset-level-filters" hidden>
-    <select id="assetLevelPack" aria-label="Bộ level"><option value="gdd">137 màn GDD</option><option value="happy">Happy Tidy Room (Lumos)</option><option value="tidy">Tidy Room Circle</option><option value="roomsort">Amochioom (Room Sort)</option></select>
+    <select id="assetLevelPack" aria-label="Bộ level"><option value="gdd">137 màn GDD</option><option value="happy">Happy Tidy Room (Lumos)</option><option value="tidy">Tidy Room Circle</option><option value="roomsort">Amochioom (Room Sort)</option><option value="roomsort-new">RoomSort New · 160 màn</option></select>
     <select id="assetLevelNumber" aria-label="Màn trong bộ"></select>
    </div>
    <input id="search" aria-label="Tìm asset" placeholder="Tìm tên, mã hoặc nhóm…"><select aria-label="Nhóm đồ" id="groupFilter"><option value="">Tất cả nhóm</option></select>
@@ -111,7 +111,7 @@
 <dialog id="loadDialog"><div class="dialog-head"><div><div class="overline">THƯ VIỆN LEVEL</div><h2>Nhập và chuyển level</h2></div><button data-close="loadDialog" aria-label="Đóng">✕</button></div>
  <div class="dialog-content"><section class="import-section"><h3>Bộ level trong GDD</h3><button id="allGdd" class="primary">Mở 137 màn GDD</button></section>
  <button id="resumeDraft" hidden>Mở bản nháp</button>
- <section class="import-section"><h3>Level tham chiếu</h3><div class="inline flex-wrap"><button id="allHappy">Happy Tidy Room (Lumos)</button><button id="allTidy">Tidy Room Circle</button><button id="allRoom">Amochioom (Room Sort)</button></div></section>
+ <section class="import-section"><h3>Level tham chiếu</h3><div class="inline flex-wrap"><button id="allHappy">Happy Tidy Room (Lumos)</button><button id="allTidy">Tidy Room Circle</button><button id="allRoom">Amochioom (Room Sort)</button><button id="allRoomNew">RoomSort New · 160 màn</button></div></section>
  <section class="import-section"><h3>File từ game clone</h3><p>JSON, JSON.GZ hoặc ZIP chứa nhiều level. Nhập xong có thể chọn từng màn để sửa và chơi thử.</p><label class="stack">Định dạng nguồn<select id="source"><option value="auto">Tự nhận dạng</option><option value="room">RoomSort · nền gốc</option><option value="tidy">Tidy Room · nền Tidy</option><option value="happy">Happy Tidy Room</option></select></label><div id="drop" class="drop"><span>Thả file vào đây</span><div class="inline"><button id="chooseFiles" type="button">Chọn file</button><label class="button" for="folder">Chọn thư mục</label></div><input id="files" type="file" multiple accept=".json,.gz,.zip" hidden><input id="folder" type="file" webkitdirectory multiple hidden></div></section>
  <p id="importStatus" role="status"></p></div>
 </dialog>
@@ -139,6 +139,7 @@
 <script defer src="./data/asset-names.js"></script>
 <script defer src="./data/background-names.js"></script>
 <script defer src="./data/gdd-tidy-art.js"></script>
+<script defer src="./data/roomsort-new-catalog.js"></script>
 <script defer src="./data/surface-rails.js"></script>
 <script defer src="./data/levels.js"></script>
 <script defer src="./vendor/jszip.min.js"></script>
