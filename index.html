@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="vi">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RoomSort · Level Tool</title><link rel="stylesheet" href="./style.css"></head>
+<body>
+<main class="shell">
+ <aside class="sidebar assets">
+  <div class="section-heading"><h2>Catalog RoomSort</h2><small id="assetTotal">Đang nạp catalog…</small></div>
+  <div class="tabs asset-tabs"><button class="active" id="itemsTab" aria-pressed="true">Đồ vật</button><button id="bgTab" aria-pressed="false">Ảnh nền</button><button id="unusedTab" aria-pressed="false" title="Ảnh vật phẩm không xuất hiện trong bộ GDD 137 level">Chưa dùng</button><button id="levelAssetsTab" aria-pressed="false">Asset theo level</button></div>
+  <div class="filters">
+   <div id="assetLevelFilters" class="asset-level-filters" hidden>
+    <select id="assetLevelPack" aria-label="Bộ level"><option value="gdd">137 màn GDD</option><option value="happy">Happy Tidy Room (Lumos)</option><option value="tidy">Tidy Room Circle</option><option value="roomsort">Amochioom (Room Sort)</option></select>
+    <select id="assetLevelNumber" aria-label="Màn trong bộ"></select>
+   </div>
+   <input id="search" aria-label="Tìm asset" placeholder="Tìm tên, mã hoặc nhóm…"><select aria-label="Nhóm đồ" id="groupFilter"><option value="">Tất cả nhóm</option></select>
+  </div>
+  <div class="asset-list" id="assetList"></div>
+  <div class="pager"><button id="assetPrev" aria-label="Trang asset trước">‹</button><small id="assetPage"></small><button id="assetNext" aria-label="Trang asset sau">›</button></div>
+  <div id="resizeCatalog" class="sidebar-divider" role="separator" aria-label="Độ rộng catalog" aria-controls="assetList" aria-orientation="vertical" tabindex="0" title="Kéo để chỉnh độ rộng catalog"></div>
+ </aside>
+ <section class="work">
+  <div class="worktop"><div class="work-title"><div class="overline" id="editorMode">02 / XẾP LEVEL</div><input id="title" value="Màn mới" aria-label="Tên màn" maxlength="120"></div><div class="work-actions"><div class="edit-actions"><button id="undo" title="Ctrl+Z">Hoàn tác</button><button id="redo" title="Ctrl+Shift+Z hoặc Ctrl+Y">Làm lại</button><button id="center" title="Căn nền vừa chiều cao canvas">Fit</button><button id="portrait" aria-pressed="false" title="Hiện khung màn hình dọc 9:16">9:16</button><button id="grid" class="active" aria-pressed="true">Lưới</button><button id="toggleBoxes" class="active" aria-pressed="true">Hiện hộp</button><button id="placeCenter" class="primary" hidden>+ Đặt ở tâm</button></div><button id="play" class="primary">▶ Playtest</button><div class="file-actions"><button id="new">Màn mới</button><button id="library">Nhập level</button><button id="openLevelFile" title="Mở file JSON của tool hoặc Unity">Mở JSON / Unity</button><button id="download">Xuất JSON…</button><button id="unity">Xuất Unity…</button></div></div></div>
+  <div class="batchbar" id="batchbar" hidden><select id="batchLevel" aria-label="Chọn màn trong bộ"></select><button id="savePack">Lưu cả bộ</button><button id="showReport">Báo cáo nhập</button></div>
+  <div id="variantPreviewBar" class="variant-preview" hidden>
+   <div><strong id="variantPreviewTitle"></strong><div id="variantPreviewMetrics"></div></div>
+   <div class="inline flex-wrap"><button id="variantCompare" aria-pressed="false">Xem màn gốc</button><button id="variantDiscard" class="warning">Xóa bản này</button><button id="variantSave" class="primary">Lưu bản này</button></div>
+  </div>
+  <div class="playbar" id="playbar" hidden><div class="test-controls"><button id="runBot">Chạy bot</button><button id="stepBot" hidden>Bước bot</button><button id="hintToggle" class="active" aria-pressed="true">Hint: Bật</button><button id="restart">Chơi lại</button><button id="exitPlay">Về xếp đồ</button></div></div>
+  <div id="viewport" class="viewport">
+   <canvas id="board" tabindex="0" aria-label="Khu vực xếp và chơi thử level"></canvas>
+   <div class="board-hud"><div id="testBoxes" aria-label="Hộp đang mở" hidden></div><p id="boxMatch" role="status" hidden></p><div id="testTray" aria-label="Khay chờ" hidden></div></div>
+   <div class="coordinate" id="coord">X 0 · Y 0</div><div id="modeTip" class="mode-tip" hidden></div><div id="finish" class="finish" hidden></div>
+  </div>
+  <footer class="workfoot"><span id="notice" role="status">Đang mở tool…</span><span id="boxBalance" aria-live="polite" hidden></span><span id="zoomText">100%</span><button id="editHelp" title="Phím tắt và thao tác canvas">Phím tắt</button></footer>
+ </section>
+ <aside class="sidebar inspect" id="inspector">
+  <div id="resizeInspector" class="sidebar-divider" role="separator" aria-label="Độ rộng bảng cấu hình" aria-controls="inspector" aria-orientation="vertical" tabindex="0" title="Kéo để chỉnh độ rộng bảng cấu hình"></div>
+  <div class="section-heading"><span>03 / CẤU HÌNH</span><h2 id="inspectHeading">Level</h2><small id="summary">0 món · 0 hộp</small><small id="referenceInfo" hidden></small></div>
+  <div class="tabs"><button id="layerTab" class="active" aria-controls="layerPanel" aria-pressed="true">Lớp đồ</button><button id="boxTab" aria-controls="boxPanel" aria-pressed="false">Hộp & luật</button><button id="generateTab" aria-controls="generatePanel" aria-pressed="false">Sinh level</button><button id="jsonTab" aria-controls="jsonPanel" aria-pressed="false">JSON</button></div>
+  <div id="layerPanel" class="panel">
+   <div class="empty" id="selectionEmpty">Bấm món để chọn. Kéo từ chỗ trống để quét nhiều món.</div>
+   <fieldset id="itemFields" hidden><legend id="itemTitle"></legend>
+    <div class="fields"><label>X<input id="x" type="number" step="1"></label><label>Y<input id="y" type="number" step="1"></label><label>Góc °<input id="angle" type="number" step="1"></label><label>Scale X<input id="scaleX" type="number" step="0.05"></label><label>Scale Y<input id="scaleY" type="number" step="0.05"></label><label>Nhóm nhận<select id="itemGroup"></select></label></div>
+   </fieldset>
+   <fieldset id="selectionActions" hidden><legend id="selectionCount">Chọn đồ</legend>
+    <div class="selection-actions">
+     <button id="turnLeft" title="Xoay trái 15° ([)">↶ 15°</button><button id="turnRight" title="Xoay phải 15° (])">↷ 15°</button><button id="flipX">Lật ngang</button><button id="flipY">Lật dọc</button>
+     <button id="layerBack" title="Hạ xuống dưới món chồng gần nhất">↓ Hạ</button><button id="layerFront" title="Nâng lên trên món chồng gần nhất">↑ Nâng</button><button id="duplicate" title="Ctrl+D">Nhân bản</button><button id="delete" class="warning" title="Delete">Xóa</button><button id="fitItem" title="Đưa đồ đã chọn về cỡ tham chiếu">Cỡ gốc</button><button id="focusSelection" title="Thu phóng tới vùng chọn (F)">Tới vùng chọn</button>
+    </div>
+    <div class="selection-actions" id="groupTools" hidden>
+     <button id="shrinkGroup">−10%</button><button id="growGroup">+10%</button>
+     <select id="alignGroup" aria-label="Căn hàng cụm đồ"><option value="">Căn hàng…</option><option value="left">Căn trái</option><option value="right">Căn phải</option><option value="x">Căn giữa ngang</option><option value="top">Căn trên</option><option value="bottom">Căn dưới</option><option value="y">Căn giữa dọc</option></select>
+    </div>
+   </fieldset>
+   <div class="listhead"><div><strong>Lớp trong chồng đồ</strong><br><small id="stackDepth"></small></div><button id="fitAll" class="quiet" title="Đưa toàn bộ đồ về cỡ tham chiếu, giữ vị trí, góc và lật">Cỡ gốc cả màn</button></div>
+   <small id="layerDragHelp" class="layer-drag-help" hidden>Kéo lên xuống để đổi lớp. Thả sang cụm khác để chuyển món tới cụm đó.</small>
+   <div class="layers" id="layers"></div>
+  </div>
+  <div id="boxPanel" class="panel" hidden>
+   <label class="stack">Luật khay chờ<select id="rule"><option value="strict">Thua khi đầy 5 slot</option><option value="direct">Đầy khay: được lấy đồ vào thẳng hộp</option></select></label>
+   <div class="listhead"><strong>Hàng đợi hộp</strong><small>2 hộp mở lúc đầu</small></div><div id="orders"></div>
+   <div class="box-add"><select id="groupOrder" aria-label="Nhóm hộp"></select><button id="addBox">+ Hộp</button></div>
+   <label class="stack">Tối đa món mỗi hộp<input id="maxBox" type="number" min="1" max="12" value="5"></label>
+   <label class="stack">Độ khó hàng đợi<select id="boxDifficulty"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label>
+   <button id="fillBoxes" class="primary wide">Sinh hộp từ layout</button>
+   <div id="validation" class="validation"></div>
+  </div>
+  <div id="generatePanel" class="panel" hidden>
+   <button id="openVariants" class="primary wide">Chỉnh sửa tự động</button>
+   <label class="stack">Cách bám nền<select id="scatterMode"><option value="auto">Tự chọn theo nền</option><option value="reference">Sinh mới theo mặt đặt của nền</option><option value="zones">Vùng đặt và mép vắt</option></select></label>
+   <p id="scatterModeHelp" class="generator-help"></p>
+   <fieldset id="generateFields">
+    <legend>Vị trí trên nền</legend>
+    <p class="generator-help">Vùng đặt là mặt bàn, mặt giường hoặc sàn. Mép vắt là đường để treo hoặc vắt một món đồ. Tool lưu các đánh dấu theo nền.</p>
+    <div class="item-controls"><button type="button" id="addZone" aria-pressed="false">+ Vùng đặt</button><button type="button" id="addEdge" aria-pressed="false">+ Mép vắt</button><button type="button" id="addPolygon" aria-pressed="false">+ Đa giác</button></div>
+    <div id="templateGuide" class="template-guide" hidden><img id="edgeSpritePreview" alt="" hidden><span id="templateHint"></span></div>
+    <div class="item-controls" id="templateActions" hidden><button id="saveZone">Lưu vùng</button><button id="undoTemplatePoint">Lùi điểm</button><button id="cancelTemplate">Hủy vẽ</button></div>
+    <div id="templateList" class="generator-list"></div>
+   </fieldset>
+   <fieldset id="scatterFields">
+    <legend>Đồ sẽ rải</legend>
+    <div class="box-add"><select id="scatterGroup" aria-label="Nhóm đồ để rải"></select><button id="addScatterGroup">+ Nhóm</button></div>
+    <button id="clearScatterGroups" type="button">Dùng nhóm theo bố cục</button>
+    <div id="scatterGroups" class="generator-list"></div>
+    <div class="generator-numbers"><label class="stack">Số món<input id="scatterCount" type="number" min="1" max="300" value="24"></label><label class="stack">Tối đa lớp<input id="scatterLayers" type="number" min="1" max="12" value="3"></label></div>
+    <div class="generator-numbers"><label class="stack">Món mỗi hộp tối đa<input id="scatterMaxBox" type="number" min="1" max="12" value="5"></label><label class="stack">Lượt thử<select id="scatterAttempts"><option value="3">Nhanh · 3</option><option value="8">Kỹ · 8</option></select></label></div>
+    <label class="stack">Cỡ hộp ưu tiên<select id="scatterBoxStyle"><option value="neatopia">3–4 món · Neatopia</option><option value="max">Theo số món tối đa</option></select></label>
+    <label class="inline" id="autoDrapeSetting"><input id="autoDrape" type="checkbox" checked> Thêm đồ vắt ở mép ước lượng</label>
+    <div class="generator-numbers" id="zoneSettings"><label class="stack">Ưu tiên xếp chồng<select id="scatterStack"><option value="0.15">Thấp</option><option value="0.45">Vừa</option><option value="0.75" selected>Cao</option></select></label><label class="stack">Xoay đồ trong vùng<select id="scatterAngle"><option value="0">Giữ thẳng</option><option value="10">±10°</option><option value="20">±20°</option></select></label></div>
+   </fieldset>
+   <button id="scatter" class="primary wide">Sinh bản xem trước</button>
+  </div>
+  <div id="jsonPanel" class="panel" hidden>
+   <label class="stack">Định dạng<select id="jsonFormat"><option value="tool">JSON chỉnh level</option><option value="unity">JSON xuất Unity</option></select></label>
+   <div class="inline flex-wrap"><button id="openJson">Mở JSON</button><button id="saveJson">Tải JSON</button></div>
+   <input id="jsonFile" type="file" accept=".json,.gz,.zip" multiple hidden>
+   <p id="jsonImportStatus" role="status" hidden></p>
+   <p id="jsonNote" role="status"></p>
+   <textarea id="jsonContent" aria-label="Nội dung JSON" readonly spellcheck="false" wrap="off"></textarea>
+  </div>
+ </aside>
+</main>
+<dialog id="editorHelp"><div class="dialog-head"><h2>Thao tác editor</h2><button data-close="editorHelp" aria-label="Đóng">✕</button></div>
+ <div class="dialog-content editor-help">
+  <p><b>Chọn đồ</b> · Bấm một món hoặc kéo từ chỗ trống để quét. Giữ Shift hoặc Ctrl khi bấm để thêm/bớt. Giữ Shift khi quét để thêm vào vùng chọn. Bấm M để bật chế độ quét từ cả vùng có đồ.</p>
+  <p><b>Di chuyển và xoay</b> · Kéo món đang chọn để di chuyển cả cụm. Kéo tay xoay phía trên vùng chọn hoặc dùng [ và ]. Giữ Shift để bắt lưới 25 đơn vị khi kéo, hoặc xoay theo nấc 15°.</p>
+  <p><b>Đổi cỡ</b> · Kéo một góc khung chọn để phóng to hoặc thu nhỏ, giữ tỷ lệ và cố định góc đối diện. Giữ Shift để đổi cỡ theo nấc 10%.</p>
+  <p><b>Phím tắt</b> · Ctrl+A chọn tất cả, Ctrl+D nhân bản, Ctrl+C/V sao chép và dán, Delete xóa. Phím mũi tên dời 1 đơn vị, Shift + mũi tên dời 10. Ctrl+Z hoàn tác, Ctrl+Shift+Z hoặc Ctrl+Y làm lại.</p>
+  <p><b>Camera</b> · Giữ Space rồi kéo chuột trái, hoặc kéo bằng chuột phải. Lăn chuột để zoom. Bấm F để tới vùng chọn. Nút 9:16 bật hoặc tắt khung tham chiếu màn dọc.</p>
+ </div>
+</dialog>
+<dialog id="loadDialog"><div class="dialog-head"><div><div class="overline">THƯ VIỆN LEVEL</div><h2>Nhập và chuyển level</h2></div><button data-close="loadDialog" aria-label="Đóng">✕</button></div>
+ <div class="dialog-content"><section class="import-section"><h3>Bộ level trong GDD</h3><button id="allGdd" class="primary">Mở 137 màn GDD</button></section>
+ <button id="resumeDraft" hidden>Mở bản nháp</button>
+ <section class="import-section"><h3>Level tham chiếu</h3><div class="inline flex-wrap"><button id="allHappy">Happy Tidy Room (Lumos)</button><button id="allTidy">Tidy Room Circle</button><button id="allRoom">Amochioom (Room Sort)</button></div></section>
+ <section class="import-section"><h3>File từ game clone</h3><p>JSON, JSON.GZ hoặc ZIP chứa nhiều level. Nhập xong có thể chọn từng màn để sửa và chơi thử.</p><label class="stack">Định dạng nguồn<select id="source"><option value="auto">Tự nhận dạng</option><option value="room">RoomSort · nền gốc</option><option value="tidy">Tidy Room · nền Tidy</option><option value="happy">Happy Tidy Room</option></select></label><div id="drop" class="drop"><span>Thả file vào đây</span><div class="inline"><button id="chooseFiles" type="button">Chọn file</button><label class="button" for="folder">Chọn thư mục</label></div><input id="files" type="file" multiple accept=".json,.gz,.zip" hidden><input id="folder" type="file" webkitdirectory multiple hidden></div></section>
+ <p id="importStatus" role="status"></p></div>
+</dialog>
+<dialog id="reportDialog"><div class="dialog-head"><div><div class="overline">KẾT QUẢ</div><h2>Báo cáo chuyển level</h2></div><button data-close="reportDialog" aria-label="Đóng">✕</button></div><div class="dialog-content"><p id="reportSummary"></p><div id="reportRows"></div><button id="downloadReport">Tải báo cáo JSON</button></div></dialog>
+<dialog id="variantDialog"><div class="dialog-head"><h2>Chỉnh sửa tự động</h2><button id="closeVariants" data-close="variantDialog" aria-label="Đóng">✕</button></div>
+ <div class="dialog-content">
+  <p class="generator-help">Hoán đổi vị trí có sẵn giữa đồ gần kích thước. Tool kiểm tra đường thắng và so độ khó bằng bot trước khi mở bản xem thử.</p>
+  <div class="generator-numbers variant-settings">
+   <label class="stack">Thay đổi<select id="variantMode"><option value="both">Hộp, vị trí và lớp đồ</option><option value="boxes">Thứ tự hộp</option><option value="positions">Vị trí và cụm đồ</option><option value="layers">Lớp đồ</option></select></label>
+   <label class="stack">Mức xáo trộn<select id="variantStrength"><option value="1">Nhẹ</option><option value="2" selected>Vừa</option><option value="3">Mạnh</option></select></label>
+   <label class="stack">Độ khó so với màn gốc<select id="variantDifficulty"><option value="same">Giữ độ khó</option><option value="harder">Tăng độ khó</option><option value="easier">Giảm độ khó</option></select></label>
+   <label class="stack">Tìm đường thắng<select id="variantSearch"><option value="quick">Nhanh · ~10 giây/màn</option><option value="deep" selected>Kỹ · ~28 giây/màn</option><option value="extended">Lâu hơn · ~65 giây/màn</option></select></label>
+  </div>
+  <div class="inline flex-wrap"><button id="variantOne" class="primary">Tạo bản xem trước</button><button id="variantAll">Biến tấu cả bộ</button><button id="cancelVariants" hidden>Dừng</button></div>
+  <p id="variantStatus" role="status"></p>
+  <div id="variantAlternative" hidden></div>
+  <progress id="variantProgress" hidden></progress>
+  <details id="variantChanges" hidden><summary>Thay đổi từng màn</summary><div id="variantChangeRows" class="variant-rows"></div></details>
+  <details id="variantSkipped" hidden><summary>Các màn giữ nguyên</summary><div id="variantRows" class="variant-rows"></div></details>
+  <button id="downloadVariants" class="primary" hidden>Tải bộ biến tấu</button>
+ </div>
+</dialog>
+<script defer src="./data/catalog.js"></script>
+<script defer src="./data/tidy57-addon.js"></script>
+<script defer src="./data/asset-names.js"></script>
+<script defer src="./data/background-names.js"></script>
+<script defer src="./data/gdd-tidy-art.js"></script>
+<script defer src="./data/surface-rails.js"></script>
+<script defer src="./data/levels.js"></script>
+<script defer src="./vendor/jszip.min.js"></script>
+<script defer src="./game.js"></script>
+<script defer src="./offline.js"></script>
+<script defer src="./generator.js"></script>
+<script defer src="./bot.js"></script>
+<script defer src="./variant.js"></script>
+<script defer src="./app.js"></script>
+</body></html>

@@ -1,0 +1,1 @@
+Unity 6000.0.78f1: RoomSort JSON imported twice, art copied and decoded, catalog preserved, playtest won.
